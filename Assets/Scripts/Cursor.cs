@@ -4,26 +4,36 @@ using System.Collections;
 public class Cursor : MonoBehaviour {
 	public KeyCode RotationKey = KeyCode.Mouse0;
 	public KeyCode SelectionKey = KeyCode.Mouse1;
+	public float xpos = 0.5f;
 
 	private FeatureCollider highlighted;
 	private FeatureCollider selected;
 	private bool rotating = false;
-	private Canvas UI;
+	private OVRGUI GuiHelper = new OVRGUI();
+	private RenderTexture GUIRenderTexture;
+	private GameObject GUIRenderObject = null;
+//	private Canvas UI;
 
 	void Awake () {
-		UI = GameObject.FindObjectOfType<Canvas>();
-		UI.enabled = false;
+//		GUIRenderObject = GameObject.Instantiate(Resources.Load("OVRGUIObjectMain")) as GameObject;
+//		GUIRenderTexture = new RenderTexture (Screen.width, Screen.height, 0);
+//		GUIRenderObject.renderer.material.mainTexture = GUIRenderTexture;
+//		UI = GameObject.FindObjectOfType<Canvas>();
+//		UI.enabled = false;
 	}
-
+//	void OnGUI() {
+//		string text = "HI!";
+//		GuiHelper.StereoBox (xpos,.5f,.1f,.1f,ref text,Color.white);
+//	}
 	void Update () {
 
 		if (Input.GetKeyDown(SelectionKey)){
 			if (highlighted && !selected){
 				selected = highlighted;
-				UI.enabled = true;
+//				UI.enabled = true;
 			}
 			else {
-				UI.enabled = false;
+//				UI.enabled = false;
 				selected = null;
 			}
 		}
@@ -31,7 +41,7 @@ public class Cursor : MonoBehaviour {
 			rotating = true;
 		}
 		if (Input.GetKeyUp(RotationKey)){
-			UI.enabled = false;
+//			UI.enabled = false;
 			selected = null;
 			rotating = false;
 		}
