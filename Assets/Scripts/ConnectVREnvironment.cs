@@ -23,7 +23,6 @@ public class ConnectVREnvironment : MonoBehaviour {
 		}
 		if (GUILayout.Button("Host")){
 			Network.InitializeServer(4, 25452, !Network.HavePublicAddress());
-			MasterServer.RegisterHost(GameTypeName,"VR Room");
 		}
 	}
 
@@ -34,6 +33,7 @@ public class ConnectVREnvironment : MonoBehaviour {
 	
 	void OnServerInitialized() {
 		text.text = "Server initialized";
+		MasterServer.RegisterHost(GameTypeName,"VR Room");
 		NetworkLevelLoader.Instance.LoadLevel(1);
 	}
 

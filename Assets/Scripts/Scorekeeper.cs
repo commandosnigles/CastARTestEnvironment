@@ -5,30 +5,52 @@ public class Scorekeeper : MonoBehaviour {
 
 	public int ScoreLimit = 10;
 	public Transform[] Spawns;
-	public GameObject paddlePrefab;
+	public GameObject playerPrefab;
+	public GameObject otherPlayerPrefab;
 
 
 	void Start () {
 		if (Network.isServer) {
-			Network.Instantiate (paddlePrefab, Spawns[0].position, Quaternion.identity, 0);
+			Network.Instantiate (playerPrefab, Spawns[0].position, Quaternion.identity,0);
+//			NetworkViewID viewID = Network.AllocateViewID(); 
+//			GameObject me = GameObject.Instantiate(playerPrefab,Spawns[0].position,Quaternion.identity) as GameObject;
+//			me.GetComponent<NetworkView>().viewID = viewID;
+//			networkView.RPC ("net_SpawnOthers", RPCMode.AllBuffered, viewID, Spawns[0].position);
 		}
 	}
 
 	void OnPlayerConnected (NetworkPlayer player) {
+//		NetworkViewID viewID = Network.AllocateViewID(); 
 		int playercount = Network.connections.Length;
-		networkView.RPC ("net_DoSpawn", player, Spawns[playercount-1].position);
+		networkView.RPC ("net_SpawnMe", player, Spawns[playercount].position);
+//		networkView.RPC ("net_SpawnOthers", RPCMode.AllBuffered, viewID, Spawns[playercount].position);
 	}
 
 	void OnPlayerDisconnected (NetworkPlayer player) {
-	
+		Network.DestroyPlayerObjects(player);
 	}
 
 	void OnDisconnectedFromServer (NetworkDisconnection cause) {
 		Application.LoadLevel ("TestMenu");
 	}
 	[RPC]
-	void net_DoSpawn (Vector3 position) {
-		Network.Instantiate (paddlePrefab, position, Quaternion.identity, 0);
+	void net_SpawnMe (Vector3 position) {
+		Network.Instantiate (playerPrefab, position, Quaternion.identity,0);
+//		GameObject me;
+//		me = Instantiate (playerPrefab, position, Quaternion.identity) as GameObject;
+//		NetworkView nView;
+//		nView = me.GetComponent<NetworkView>();
+//		nView.viewID = viewID;
+
+	}
+
+	[RPC]
+	void net_SpawnOthers (NetworkViewID viewID, Vector3 position) {
+		GameObject other;
+		other = Instantiate (otherPlayerPrefab, position, Quaternion.identity) as GameObject;
+		NetworkView nView;
+		nView = other.GetComponent<NetworkView>();
+		nView.viewID = viewID;
 	}
 
 //	public void AddScore (int player) {
