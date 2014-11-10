@@ -4,15 +4,16 @@ using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshCollider))]
 public class FeatureCollider : MonoBehaviour {
-	public class Response {
-		public string Answer = "";
-		public bool Correct = false;
-		public Response (string answer, bool correct) {
-			Answer = answer;
-			Correct = correct;
-		}
-	}
-	public List<Response> Responses = new List<Response>();
+//	public class Response {
+//		public string Answer = "";
+//		public bool Correct = false;
+//		public Response (string answer, bool correct) {
+//			Answer = answer;
+//			Correct = correct;
+//		}
+//	}
+//	public List<Response> Responses = new List<Response>();
+	public bool CorrectResponse = false;
 	public float HighlightIntensity = 0.8f;
 	public float HighlightSpeed = 10f;
 
@@ -21,6 +22,10 @@ public class FeatureCollider : MonoBehaviour {
 	void OnValidate () {
 		HighlightIntensity = Mathf.Clamp01(HighlightIntensity);
 		HighlightSpeed = Mathf.Clamp(HighlightSpeed, 0, 100);
+	}
+
+	public void SelectAsAnswer() {
+		TestLog.Instance.Answer (CorrectResponse);
 	}
 
 	public void StartHover () {

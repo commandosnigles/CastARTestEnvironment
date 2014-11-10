@@ -61,6 +61,9 @@ public class OVRCrosshair
 	
 	private float  ScreenWidth		  = 1280.0f;
 	private float  ScreenHeight 	  =  800.0f;
+
+	private FeatureCollider highlighted;
+	private LaserPointer laser;
 	
 	#endregion
 	
@@ -130,7 +133,7 @@ public class OVRCrosshair
 	{
 		// Do not do these tests within OnGUI since they will be called twice
 		ShouldDisplayCrosshair();
-		CollisionWithGeometryCheck();
+		HighlightFeature(CollisionWithGeometryCheck());
 	}
 	
 	/// <summary>
@@ -138,10 +141,10 @@ public class OVRCrosshair
 	/// </summary>
 	public void  OnGUICrosshair()
 	{
-		if ((DisplayCrosshair == true) && (CollisionWithGeometry == false))
+		if ((DisplayCrosshair == true))// && (CollisionWithGeometry == false))
 			FadeVal += Time.deltaTime / FadeTime;
-		else
-			FadeVal -= Time.deltaTime / FadeTime;
+//		else
+//			FadeVal -= Time.deltaTime / FadeTime;
 		
 		FadeVal = Mathf.Clamp(FadeVal, 0.0f, 1.0f);
 		
@@ -232,31 +235,91 @@ public class OVRCrosshair
 					
 		return DisplayCrosshair;
 	}
+
+	void SelectFeatureAsAnswer() {
+		if (highlighted && Input.GetKeyDown(KeyCode.Mouse0))
+			highlighted.SendMessage("SelectAsAnswer", SendMessageOptions.DontRequireReceiver);
+	}
+
+	void HighlightFeature(GameObject hitObject){
+		if (hitObject){
+//			Debug.Log (hitObject.name + " Hit!");
+			FeatureCollider hitFeature = hitObject.GetComponent<FeatureCollider>();
+			if (hitFeature) {
+//				Debug.Log ("Feature Collider Hit!");
+				// already a highlighted object
+				if (highlighted){
+					if (hitFeature != highlighted){
+//						Debug.Log("New Feature Highlighted!");
+						// replace highlighted
+						highlighted.EndHover();
+						highlighted = hitFeature;
+						highlighted.StartHover();
+					}
+				}
+				else {
+					highlighted = hitFeature;
+					highlighted.StartHover();
+				}					
+			}
+			//Ray is not hitting a Feature Collider
+			else {
+//				Debug.Log("No Feature Hit!");
+				if (highlighted) {
+					highlighted.EndHover();
+					highlighted = null;
+				}
+			}
+		}
+		else {
+//			Debug.Log("No Collision");
+			if (highlighted) {
+				highlighted.EndHover();
+				highlighted = null;
+			}
+		}
+	}
 	
 	/// <summary>
 	/// Do a collision raycast on geometry for crosshair.
 	/// </summary>
 	/// <returns><c>true</c>, if with geometry check was collisioned, <c>false</c> otherwise.</returns>
-	bool CollisionWithGeometryCheck()
+	GameObject CollisionWithGeometryCheck()
 	{
 		CollisionWithGeometry = false;
-		
+		GameObject hitObject = null;
 		Vector3 startPos = MainCam.transform.position;
 		Vector3 dir = Vector3.forward;
 		dir = MainCam.transform.rotation * dir;
 		dir *= CrosshairDistance;
+//		Debug.DrawRay(startPos, dir);
 		Vector3 endPos = startPos + dir;
-		
+//		Vector3 crosshairDir = MainCam.transform.rotation * new Vector3(1, 2.25f*(-YL), 3.6f*(XL-0.5f) );
+		Vector3 crosshairDir = MainCam.transform.rotation * new Vector3(-(ScreenWidth / 2 -XL) / ScreenWidth * 3.6f,
+		                                                                (ScreenHeight / 2 - YL) / ScreenHeight * 2.25f, 1);
+//		dir = Vector3.Scale(dir, crosshairDir);
+		Debug.DrawRay(startPos, crosshairDir);
 		RaycastHit hit;
-		if (Physics.Linecast(startPos, endPos, out hit)) 
-		{
-			if (!hit.collider.isTrigger)
-			{
-				CollisionWithGeometry = true;
-			}
+		if (Physics.Raycast(startPos, crosshairDir, out hit)){
+			CollisionWithGeometry = true;
+			hitObject = hit.collider.gameObject;
 		}
-		
-		return CollisionWithGeometry;
+
+		if (!laser)
+			laser = MainCam.transform.parent.GetComponentInChildren<LaserPointer>();
+		if (laser)
+			laser.RotateToCursor(crosshairDir);
+		else Debug.Log("No Laser found");
+
+//		if (Physics.Linecast(startPos, endPos, out hit)) 
+//		{
+//			if (!hit.collider.isTrigger)
+//			{
+//				CollisionWithGeometry = true;
+//			}
+//		}
+//		
+		return hitObject;
 	}
 	#endregion
 }
