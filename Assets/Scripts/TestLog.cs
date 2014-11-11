@@ -9,12 +9,18 @@ public class TestLog : MonoBehaviour {
 
 	public static TestLog Instance;
 
-	public int TestID;
+	public static int TestID;
+	public bool Oculus = true;
+	public int ModelCount = 20;
+	private List <int> modelOrder = new List<int>();
+	private int modelListPosition = 0;
 
-	private int modelID;
+	private int currentModelID;
+	private GameObject currentModel;
 	private bool modelLoaded;
 	private float testStartTime;
-	//File logFile = File.Create("testLog-" + TestID.ToString + ".txt");
+	private static string directory = Application.persistentDataPath;
+//	FileStream logFile = File.Create(directory + "/TestLog_" + TestID.ToString ());
 
 	public struct LogEntry {
 		public int ModelID;
@@ -29,11 +35,26 @@ public class TestLog : MonoBehaviour {
 		if (!Instance)
 			Instance = this;
 		else Destroy(this);
+		PopulateModelOrder();
 	//	logFile = File.Create("testLog-" + TestID.ToString + ".txt");
 	}
 
-	public void StartTest() {
+	void Start(){
+		LoadModel();
+	}
+	[RPC]
+	public void LoadModel(){
 		testStartTime = Time.realtimeSinceStartup;
+		if (currentModel) {
+			GameObject.Destroy (currentModel);
+			modelListPosition++;
+		}
+		currentModelID = modelOrder[modelListPosition];
+
+		currentModel = GameObject.Instantiate(Resources.Load("TestModels/TestModel_" + currentModelID.ToString ()),
+		                                      Vector3.zero, Quaternion.identity) as GameObject;
+
+		currentModel.name = "TestModel_" + currentModelID.ToString ();
 	}
 
 	public void AddEntry (int modelID, float responseTime, bool correct) {
@@ -42,10 +63,29 @@ public class TestLog : MonoBehaviour {
 		entry.ResponseTime = responseTime;
 		entry.Correct = correct;
 		Log.Add(entry);
+//		if (logFile.CanWrite){
+//			logFile.BeginWrite();
+//			logFile.write
+//		}
 	}
 
 	public void Answer(bool correct) {
-		AddEntry(modelID, Time.realtimeSinceStartup - testStartTime, correct);
+		AddEntry(currentModelID, Time.realtimeSinceStartup - testStartTime, correct);
+		Debug.Log("Correct Response: " + correct);
+		networkView.RPC ("LoadModel", RPCMode.AllBuffered);
+	}
+
+	void PopulateModelOrder () {
+		if (TestID % 2 == 0 ^ Oculus) {
+			for (int i = 0; i < ModelCount/2; i++) {
+				modelOrder.Add(i);
+			}
+		} 
+		else {
+			for (int i = ModelCount/2; i < ModelCount; i++) {
+				modelOrder.Add(i);
+			}
+		}
 	}
 
 }

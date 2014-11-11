@@ -52,7 +52,7 @@ public class OVRCrosshair
 	private float  ScaleSpeedY	 	  =   7.0f;
 	
 	private bool   DisplayCrosshair;
-	private bool   CollisionWithGeometry;
+//	private bool   CollisionWithGeometry;
 	private float  FadeVal;
 	private Camera MainCam;
 	
@@ -115,7 +115,7 @@ public class OVRCrosshair
 	public void Init()
 	{
 		DisplayCrosshair 		= false;
-		CollisionWithGeometry 	= false;
+//		CollisionWithGeometry 	= false;
 		FadeVal 		 		= 0.0f;
 	
 		ScreenWidth  = Screen.width;
@@ -134,6 +134,7 @@ public class OVRCrosshair
 		// Do not do these tests within OnGUI since they will be called twice
 		ShouldDisplayCrosshair();
 		HighlightFeature(CollisionWithGeometryCheck());
+		SelectFeatureAsAnswer();
 	}
 	
 	/// <summary>
@@ -286,14 +287,14 @@ public class OVRCrosshair
 	/// <returns><c>true</c>, if with geometry check was collisioned, <c>false</c> otherwise.</returns>
 	GameObject CollisionWithGeometryCheck()
 	{
-		CollisionWithGeometry = false;
+//		CollisionWithGeometry = false;
 		GameObject hitObject = null;
 		Vector3 startPos = MainCam.transform.position;
 		Vector3 dir = Vector3.forward;
 		dir = MainCam.transform.rotation * dir;
 		dir *= CrosshairDistance;
 //		Debug.DrawRay(startPos, dir);
-		Vector3 endPos = startPos + dir;
+//		Vector3 endPos = startPos + dir;
 //		Vector3 crosshairDir = MainCam.transform.rotation * new Vector3(1, 2.25f*(-YL), 3.6f*(XL-0.5f) );
 		Vector3 crosshairDir = MainCam.transform.rotation * new Vector3(-(ScreenWidth / 2 -XL) / ScreenWidth * 3.6f,
 		                                                                (ScreenHeight / 2 - YL) / ScreenHeight * 2.25f, 1);
@@ -301,7 +302,7 @@ public class OVRCrosshair
 		Debug.DrawRay(startPos, crosshairDir);
 		RaycastHit hit;
 		if (Physics.Raycast(startPos, crosshairDir, out hit)){
-			CollisionWithGeometry = true;
+//			CollisionWithGeometry = true;
 			hitObject = hit.collider.gameObject;
 		}
 
